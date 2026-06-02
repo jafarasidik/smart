@@ -1,0 +1,179 @@
+@extends('layout.layout')
+@section('title', 'SMART - EDIT DATA '.$data->nama)
+@section('page_header', 'Edit Data '.$data->nama)
+@section('konten')
+    <div class="section">
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ route('data.agenda.update', $data->id) }}" method="post" class="form">
+                    @csrf
+                    @method('PUT')
+                    <div class="row">
+                        <div class="col-md-6 col-12">
+                            <div class="form-group">
+                                <label for="nama">Nama Rapat</label>
+                                <input type="text" name="nama" id="nama" class="form-control" placeholder="Masukkan Nama Rapat" value="{{ old('nama', $data->nama) }}" required autofocus>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="form-group">
+                                <label for="tanggal">Tanggal</label>
+                                <input type="date" name="tanggal" id="tanggal" class="form-control" value="{{ old('tanggal', $data->tanggal->format('Y-m-d')) }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="form-group">
+                                <label for="waktu_mulai">Waktu Mulai</label>
+                                <input type="time" name="waktu_mulai" id="waktu_mulai" class="form-control" value="{{ old('waktu_mulai', isset($data) ? \Carbon\Carbon::parse($data->waktu_mulai)->format('H:i') : '') }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="form-group">
+                                <label for="waktu_selesai">Waktu Selesai</label>
+                                <input type="time" name="waktu_selesai" id="waktu_selesai" class="form-control" value="{{ old('waktu_selesai', isset($data) ? \Carbon\Carbon::parse($data->waktu_selesai)->format('H:i') : '') }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="form-group">
+                                <label for="status">Status Rapat</label>
+                                <select name="status" id="status" class="form-select" required>
+                                    <option value="">-- Pilih Status --</option>
+                                    <option value="1" {{ old('status', $data->status) == '1' ? 'selected' : '' }}>Aktif</option>
+                                    <option value="0" {{ old('status', $data->status) == '0' ? 'selected' : '' }}>Tidak Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-12">
+                            <div class="form-group">
+                                <label for="ruangan">Ruangan</label>
+                                <select name="ruangan" id="ruangan" class="form-select" required>
+                                    <option value="">-- Pilih Ruangan --</option>
+                                    @foreach ($ruangan as $r)
+                                        <option value="{{ $r->id }}" {{ old('ruangan', $data->id_ruangan) == $r->id ? 'selected' : '' }}>{{ $r->nama }} - {{ $r->lokasi }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <div class="mb-3 align-items-center">
+                                <div class="divider">
+                                    <div class="divider-text">
+                                        <h5>Pilih Peserta Undangan</h5>
+                                    </div>
+                                </div>
+                                <!-- Fitur Cari Peserta -->
+                                <input type="text" id="searchPeserta" class="form-control" placeholder="Cari nama atau jabatan peserta...">
+                            </div>
+                    
+                            <div class="row" id="daftarPeserta" style="max-height: 400px; overflow-y: auto; padding: 5px;">
+                                @php
+                                    // Ambil daftar ID peserta yang sudah terdaftar di rapat ini
+                                    $pesertaTerpilih = $data->peserta->pluck('id')->toArray();
+                                @endphp
+
+                                @foreach($peserta as $p)
+                                <div class="col-12 col-md-4 col-lg-3 mb-2 item-peserta">
+                                    <div class="card h-100 border shadow-sm {{ in_array($p->id, $pesertaTerpilih) ? 'border-primary bg-light' : '' }}">
+                                        <div class="card-body p-2 d-flex align-items-center">
+                                            <div class="custom-control custom-checkbox mr-2">
+                                                <input type="checkbox" name="pesertas[]" value="{{ $p->id }}" 
+                                                    class="custom-control-input checkbox-peserta" id="p{{ $p->id }}"
+                                                    {{ in_array($p->id, $pesertaTerpilih) ? 'checked' : '' }}>
+                                                <label class="custom-control-label" for="p{{ $p->id }}"></label>
+                                            </div>
+                                            <div style="line-height: 1.2;">
+                                                <strong class="nama-peserta d-block text-truncate" style="font-size: 0.9rem; max-width: 150px;">{{ $p->nama }}</strong>
+                                                <small class="jabatan-peserta text-muted d-block" style="font-size: 0.75rem; max-width: 150px;">{{ $p->jxi->nama_jabatan }}</small>
+                                                <span class="badge badge-light border text-dark p-1" style="font-size: 0.65rem; margin-top: 2px;">
+                                                    {{ $p->jxi->nama_instansi }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                                <!-- Elemen Pesan Tidak Ditemukan (Default Sembunyi) -->
+                                <div id="noResults" class="col-12 text-center py-4 w-100" style="display: none;">
+                                    <div class="alert alert-light border">
+                                        <i class="fas fa-search mr-2"></i> Nama peserta "<strong><span id="searchTerm"></span></strong>" tidak ditemukan.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex justify-content-between mt-2">
+                            <a href="{{ route('data.agenda') }}" class="btn btn-sm btn-warning">
+                                <i class="bi bi-arrow-left-circle"></i> Kembali
+                            </a>
+                        
+                            <div>
+                                <button type="reset" class="btn btn-sm btn-light me-1">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                </button>
+                                <button type="submit" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-check-circle"></i> Simpan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+@push('meta')
+    <style>
+        /* Menghilangkan margin default pada custom control agar lebih rapat */
+        .custom-control-label::before, 
+        .custom-control-label::after {
+            top: 0.15rem;
+            left: -1.25rem;
+        }
+        
+        /* Efek hover agar admin tahu card mana yang sedang ditunjuk */
+        .item-peserta .card:hover {
+            border-color: #4e73df;
+            background-color: #f8f9fc;
+            cursor: pointer;
+        }
+
+        /* Scrollbar yang lebih tipis (modern) */
+        #daftarPeserta::-webkit-scrollbar {
+            width: 6px;
+        }
+        #daftarPeserta::-webkit-scrollbar-thumb {
+            background-color: #d1d3e2;
+            border-radius: 10px;
+        }
+    </style>
+@endpush
+@push('script')
+<script>
+    document.getElementById('searchPeserta').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        let items = document.querySelectorAll('.item-peserta');
+        let noResults = document.getElementById('noResults');
+        let searchTermSpan = document.getElementById('searchTerm');
+        let countVisible = 0; // Counter untuk card yang tampil
+
+        items.forEach(function(item) {
+            let nama = item.querySelector('.nama-peserta').innerText.toLowerCase();
+            let jabatan = item.querySelector('.jabatan-peserta').innerText.toLowerCase();
+            
+            if (nama.indexOf(filter) > -1 || jabatan.indexOf(filter) > -1) {
+                item.style.display = "";
+                countVisible++; // Tambah jika ada yang cocok
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        // Logika menampilkan pesan jika tidak ada yang cocok
+        if (countVisible === 0) {
+            noResults.style.display = "block";
+            searchTermSpan.innerText = this.value; // Tampilkan teks yang diketik user
+        } else {
+            noResults.style.display = "none";
+        }
+    });
+</script>
+@endpush
