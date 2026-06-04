@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Notulensi;
 use App\Models\Rapat;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 
 class PublicController extends Controller
 {

@@ -7,6 +7,7 @@ use App\Models\Rapat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class NotulensiController extends Controller
 {
@@ -16,6 +17,10 @@ class NotulensiController extends Controller
     public function index()
     {
         $data = Notulensi::with('rapat')->get();
+        foreach ($data as $n) {
+            $n->isi_notulensi = Str::words($n->isi_notulensi, 20, '...');
+        }
+        
         return view('main.data.notulensi', compact('data'));
     }
 
