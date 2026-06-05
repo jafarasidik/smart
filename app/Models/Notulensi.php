@@ -17,6 +17,10 @@ class Notulensi extends Model
         'sampai',
     ];
 
+    protected $casts = [
+        'sampai' => 'date',
+    ];
+
     protected $table = 'notulensis';
 
     public function rapat()

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstansiXJabatanController;
 use App\Http\Controllers\NotulensiController;
@@ -77,6 +78,14 @@ Route::middleware(['auth'])->group(function () {
                 'edit'      => 'data.notulensi.edit',
                 'update'    => 'data.notulensi.update',
                 'destroy'   => 'data.notulensi.delete',
+            ]);
+            Route::resource('admin', AdminController::class)->names([
+                'index'     => 'data.admin',
+                'create'    => 'data.admin.create',
+                'store'     => 'data.admin.store',
+                'edit'      => 'data.admin.edit',
+                'update'    => 'data.admin.update',
+                'destroy'   => 'data.admin.delete',
             ]);
         });
     });

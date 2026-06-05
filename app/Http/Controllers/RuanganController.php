@@ -46,8 +46,8 @@ class RuanganController extends Controller
                     'lokasi'                    => $request->lokasi,
                 ]);
             });
-
-            return redirect()->route('data.ruangan')->with('success', 'Ruangan berhasil ditambahkan!');
+            toast('Ruangan berhasil ditambahkan.', 'success')->position('top-end');
+            return redirect()->route('data.ruangan');
 
         } catch (\Exception $e) {
             // Jika error, kembali ke form dengan pesan error
@@ -92,8 +92,8 @@ class RuanganController extends Controller
                     'lokasi'        => $request->lokasi,
                 ]);
             });
-    
-            return redirect()->route('data.ruangan')->with('success', 'Ruangan berhasil diperbarui!');
+            toast('Ruangan berhasil diperbarui.', 'success')->position('top-end');
+            return redirect()->route('data.ruangan');
     
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
@@ -110,8 +110,8 @@ class RuanganController extends Controller
 
             // hapus ruangan
             $ruangan->delete();
-            return redirect()->route('data.ruangan')
-                ->with('success', 'Ruangan berhasil dihapus!');
+            toast('Ruangan berhasil dihapus.', 'success')->position('top-end');
+            return redirect()->route('data.ruangan');
 
         } catch (\Exception $e) {
 

@@ -78,7 +78,7 @@
                         <li class="sidebar-title">Halaman</li>
 
                         <li
-                            class="sidebar-item {{ request()->is('main/data/agenda') || request()->is('main/data/agenda/*') || request()->is('main/data/peserta') || request()->is('main/data/peserta/*') || request()->is('main/data/ruangan') || request()->is('main/data/ruangan/*') || request()->is('main/data/instansi-jabatan') || request()->is('main/data/instansi-jabatan/*') || request()->is('main/data/notulensi') || request()->is('main/data/notulensi/*') ? 'active' : '' }} has-sub">
+                            class="sidebar-item {{ request()->is('main/data/agenda') || request()->is('main/data/agenda/*') || request()->is('main/data/peserta') || request()->is('main/data/peserta/*') || request()->is('main/data/ruangan') || request()->is('main/data/ruangan/*') || request()->is('main/data/instansi-jabatan') || request()->is('main/data/instansi-jabatan/*') || request()->is('main/data/notulensi') || request()->is('main/data/notulensi/*') || request()->is('main/data/admin') || request()->is('main/data/admin/*') ? 'active' : '' }} has-sub">
                             <a href="#" class='sidebar-link'>
                                 <i class="bi bi-database-fill"></i>
                                 <span>Data Master</span>
@@ -104,6 +104,10 @@
                                 <li class="submenu-item {{ request()->is('main/data/notulensi') || request()->is('main/data/notulensi/*') ? 'active' : '' }}">
                                     <a href="{{ route('data.notulensi') }}"
                                         class="submenu-link">Data Notulensi</a>
+                                </li>
+                                <li class="submenu-item {{ request()->is('main/data/admin') || request()->is('main/data/admin/*') ? 'active' : '' }}">
+                                    <a href="{{ route('data.admin') }}"
+                                        class="submenu-link">Data Admin</a>
                                 </li>
                             </ul>
                         </li>

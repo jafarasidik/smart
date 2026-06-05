@@ -19,6 +19,7 @@
                                 <th class="text-center">Tanggal Rapat</th>
                                 <th class="text-center">Isi Notulensi</th>
                                 <th class="text-center">Dokumen</th>
+                                <th class="text-center">Aktif Sampai</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -37,6 +38,13 @@
                                             <a href="{{ asset('file/' . $d->file) }}" target="_blank">Lihat Dokumen</a>
                                         @else
                                             <span class="text-muted">Tidak ada file</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if ($d->sampai)
+                                            {{ $d->sampai->translatedFormat('j F Y') }}
+                                        @else
+                                            Tidak di publish
                                         @endif
                                     </td>
                                     <td>

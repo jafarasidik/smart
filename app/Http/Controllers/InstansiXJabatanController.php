@@ -54,8 +54,8 @@ class InstansiXJabatanController extends Controller
                     'nama_jabatan'  => $request->jabatan,
                 ]);
             });
-
-            return redirect()->route('data.ixj')->with('success', 'Instansi dan Jabatan berhasil ditambahkan!');
+            toast('Instansi dan Jabatan berhasil ditambahkan.', 'success')->position('top-end');
+            return redirect()->route('data.ixj');
 
         } catch (\Exception $e) {
             // Jika error, kembali ke form dengan pesan error
@@ -109,8 +109,8 @@ class InstansiXJabatanController extends Controller
                     'nama_jabatan'  => $request->jabatan,
                 ]);
             });
-    
-            return redirect()->route('data.ixj')->with('success', 'Instansi dan jabatan berhasil diperbarui!');
+            toast('Instansi dan Jabatan berhasil diperbarui.', 'success')->position('top-end');
+            return redirect()->route('data.ixj');
     
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
@@ -127,8 +127,8 @@ class InstansiXJabatanController extends Controller
         try {
             // hapus peserta
             $data->delete();
-            return redirect()->route('data.ixj')
-                ->with('success', 'Instansi dan jabatan berhasil dihapus!');
+            toast('Instansi dan Jabatan berhasil dihapus.', 'success')->position('top-end');
+            return redirect()->route('data.ixj');
 
         } catch (\Exception $e) {
 

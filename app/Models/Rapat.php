@@ -39,6 +39,12 @@ class Rapat extends Model
     {
         return $this->hasMany(Kehadiran::class, 'id_rapat');
     }
+
+    public function notulensi()
+    {
+        return $this->hasMany(Notulensi::class, 'id_rapat');
+    }
+
     public function ruangan()
     {
         return $this->belongsTo(Ruangan::class, 'id_ruangan');

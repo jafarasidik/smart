@@ -50,8 +50,8 @@ class PesertaController extends Controller
                     'whatsapp'                  => $request->whatsapp,
                 ]);
             });
-
-            return redirect()->route('data.peserta')->with('success', 'Peserta berhasil ditambahkan!');
+            toast('Peserta berhasil ditambahkan.', 'success')->position('top-end');
+            return redirect()->route('data.peserta');
 
         } catch (\Exception $e) {
             // Jika error, kembali ke form dengan pesan error
@@ -100,8 +100,8 @@ class PesertaController extends Controller
                     'whatsapp'                  => $request->whatsapp,
                 ]);
             });
-    
-            return redirect()->route('data.peserta')->with('success', 'Peserta berhasil diperbarui!');
+            toast('Peserta berhasil diperbarui.', 'success')->position('top-end');
+            return redirect()->route('data.peserta');
     
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
@@ -125,8 +125,8 @@ class PesertaController extends Controller
 
             // hapus peserta
             $peserta->delete();
-            return redirect()->route('data.peserta')
-                ->with('success', 'Peserta berhasil dihapus!');
+            toast('Peserta berhasil dihapus.', 'success')->position('top-end');
+            return redirect()->route('data.peserta');
 
         } catch (\Exception $e) {
 

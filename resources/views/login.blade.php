@@ -73,7 +73,7 @@
                                     <span class="input-group-text bg-light border-end-0 text-muted"><i
                                             class="bi bi-envelope"></i></span>
                                     <input type="email" name="email" class="form-control bg-light border-start-0"
-                                        id="email" placeholder="nama@email.com" value="{{ old('email') }}" required
+                                        id="email" placeholder="nama@email.com" value="{{ old('email') }}" required autofocus
                                         @if (session('is_locked')) disabled @endif>
                                 </div>
                             </div>

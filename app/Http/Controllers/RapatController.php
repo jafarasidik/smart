@@ -8,6 +8,7 @@ use App\Models\Ruangan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class RapatController extends Controller
 {
@@ -48,14 +49,14 @@ class RapatController extends Controller
             'pesertas.required' => 'Silakan pilih minimal satu peserta rapat.'
         ]);
         if ($request->waktu_selesai <= $request->waktu_mulai) {
+            toast('Waktu selesai harus lebih besar dari waktu mulai!', 'error')->position('top-end');
             return redirect()->back()
-                ->with('error', 'Waktu selesai harus lebih besar dari waktu mulai!')
                 ->withInput();
         }
         try {
             // 2. Gunakan Transaction untuk keamanan data
             DB::transaction(function () use ($request) {
-                
+                $admin = auth()->user()->id;
                 // 3. Simpan ke tabel rapats
                 $rapat = Rapat::create([
                     'nama'          => $request->nama,
@@ -64,15 +65,15 @@ class RapatController extends Controller
                     'waktu_selesai' => $request->waktu_selesai,
                     'status'        => $request->status,
                     'id_ruangan'    => $request->ruangan, // Sesuai name="ruangan" di form
-                    'id_user'       => 1,        // ID Admin yang input
+                    'id_user'       => $admin,        // ID Admin yang input
                 ]);
 
                 // 4. Simpan ke tabel pivot rapat_pesertas
                 // attach() akan memasukkan array ID peserta ke tabel relasi
                 $rapat->peserta()->attach($request->pesertas);
             });
-
-            return redirect()->route('data.agenda')->with('success', 'Agenda rapat berhasil dibuat!');
+            toast('Agenda rapat berhasil dibuat.', 'success')->position('top-end');
+            return redirect()->route('data.agenda');
 
         } catch (\Exception $e) {
             // Jika error, kembali ke form dengan pesan error
@@ -123,8 +124,8 @@ class RapatController extends Controller
             'pesertas.required' => 'Silakan pilih minimal satu peserta rapat.'
         ]);
         if ($request->waktu_selesai <= $request->waktu_mulai) {
+            toast('Waktu selesai harus lebih besar dari waktu mulai!', 'error')->position('top-end');
             return redirect()->back()
-                ->with('error', 'Waktu selesai harus lebih besar dari waktu mulai!')
                 ->withInput();
         }
         try {
@@ -148,8 +149,8 @@ class RapatController extends Controller
                 // - Membiarkan peserta yang tetap dicentang
                 $rapat->peserta()->sync($request->pesertas);
             });
-    
-            return redirect()->route('data.agenda')->with('success', 'Agenda rapat berhasil diperbarui!');
+            toast('Agenda rapat berhasil diperbarui.', 'success')->position('top-end');
+            return redirect()->route('data.agenda');
     
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
@@ -160,7 +161,7 @@ class RapatController extends Controller
      * Remove the specified resource from storage.
      */
 
-    public function destroy($id)
+     public function destroy($id)
     {
         $rapat = Rapat::findOrFail($id);
 
@@ -170,27 +171,43 @@ class RapatController extends Controller
         $mulai = Carbon::parse($tanggal . ' ' . $rapat->waktu_mulai);
         $selesai = Carbon::parse($tanggal . ' ' . $rapat->waktu_selesai);
 
-        // cek apakah sekarang berada di antara mulai dan selesai
+        // Cek apakah sekarang berada di antara mulai dan selesai
         if ($rapat->status && $sekarang->between($mulai, $selesai)) {
-            return back()->with(
-                'error',
-                'Rapat sedang berlangsung dan tidak dapat dihapus!'
-            );
+            toast('Rapat sedang berlangsung dan tidak dapat dihapus!', 'error')->position('top-end');
+            return back();
         }
 
         try {
-            $rapat->peserta()->detach();
+            DB::transaction(function () use ($rapat) {
+                
+                // 1. Hapus relasi Many-to-Many ke peserta
+                $rapat->peserta()->detach();
 
-            $rapat->kehadiran()->delete();
+                // 2. PERBAIKAN: Karena 'kehadiran' adalah banyak data (Collection), kita harus looping
+                foreach ($rapat->kehadiran as $hadir) {
+                    // Cek apakah ada file tanda tangan di setiap baris kehadiran
+                    if ($hadir->tandatangan) {
+                        if (Storage::disk('public_direct')->exists($hadir->tandatangan)) {
+                            Storage::disk('public_direct')->delete($hadir->tandatangan);
+                        }
+                    }
+                }
 
-            $rapat->delete();
-            return redirect()->route('data.agenda')
-                ->with('success', 'Agenda rapat berhasil dihapus!');
+                // 3. Hapus semua data kehadiran yang terikat dengan rapat ini sekaligus
+                $rapat->kehadiran()->delete();
+
+                $rapat->notulensi()->delete();
+
+                // 4. Hapus data utama Rapat
+                $rapat->delete();
+            });
+
+            toast('Agenda rapat berhasil dihapus.', 'success')->position('top-end');
+            return redirect()->route('data.agenda');
+
         } catch (\Exception $e) {
-            return back()->with(
-                'error',
-                'Gagal menghapus data: ' . $e->getMessage()
-            );
+            alert()->error('Gagal Menghapus Data', $e->getMessage());
+            return back();
         }
     }
 }

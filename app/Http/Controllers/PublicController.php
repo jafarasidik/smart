@@ -60,8 +60,8 @@ class PublicController extends Controller
         if (Auth::attempt($request->only('email', 'password'), $request->filled('remember'))) {
             $request->session()->regenerate();
             RateLimiter::clear($throttleKey);
-
-            toast('Selamat datang kembali!', 'success')->position('top-end');
+            $nama = auth()->user()->nama;
+            toast("Selamat datang kembali, $nama!", 'success')->position('top-end');
             return redirect()->intended(route('dashboard'));
         }
 
