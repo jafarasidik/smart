@@ -9,32 +9,43 @@
     <link rel="shortcut icon" href="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/svg/favicon.svg"
         type="image/x-icon">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/css/app.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/css/app-dark.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/css/iconly.css">
+    <link rel="stylesheet" href="/assets/mazer/compiled/css/app.css">
+    <link rel="stylesheet" href="/assets/mazer/compiled/css/app-dark.css">
+    <link rel="stylesheet" href="/assets/mazer/compiled/css/iconly.css">
     <style>
         .transition-all {
             transition: all 0.3s ease-in-out;
         }
+
         .custom-card-hover:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08) !important;
         }
-        .fs-7 { font-size: 0.9rem; }
-        .text-xs { font-size: 0.75rem; }
+
+        .fs-7 {
+            font-size: 0.9rem;
+        }
+
+        .text-xs {
+            font-size: 0.75rem;
+        }
     </style>
 </head>
 
 <body>
-    <script src="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/static/js/initTheme.js"></script>
+    <script src="/assets/mazer/static/js/initTheme.js"></script>
     <!-- Start content here -->
-    <nav class="navbar navbar-light">
-        <div class="container d-block">
-            <a class="navbar-brand ms-4" href="index.html">
-                <img src="/assets/mazer/static/images/logo/logo.svg">
-            </a>
-        </div>
-    </nav>
+    <header>
+        <nav class="navbar navbar-expand navbar-light navbar-top px-4">
+            <div class="container-fluid d-flex justify-content-between align-items-center">
+                <a class="navbar-brand" href="{{ route('index') }}">
+                    <img src="/assets/mazer/static/images/logo/logo.svg">
+                </a>
+
+                <a href="{{ route('login') }}" class="btn btn-primary text-nowrap"><i class="bi bi-door-open"></i> Masuk sebagai admin</a>
+            </div>
+        </nav>
+    </header>
     <div class="container my-5">
         <div class="text-center mb-5">
             <h2 class="text-uppercase fw-bold text-primary mb-1">Daftar Agenda Rapat</h2>
@@ -133,17 +144,18 @@
                                     <i class="bi bi-book-fill text-warning me-2 mt-1 fs-6"></i>
                                     <span>
                                         <strong>Isi Notulensi:</strong>
-                                        {{ \Illuminate\Support\Str::words($n->isi_notulensi, 20, '...') }}
+                                        {{ $n->isi_notulensi }}
                                     </span>
                                 </div>
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-clock-history text-danger me-2 mb-2 fs-6"></i>
                                     <span><strong>File:</strong>
-                                        @if($n->file)
+                                        @if ($n->file)
                                             <a href="{{ asset('file/' . $n->file) }}" target="_blank">Lihat Dokumen</a>
                                         @else
                                             <span class="text-muted">Tidak ada file</span>
-                                        @endif</span>
+                                        @endif
+                                    </span>
                                 </div>
                             </div>
                             <div class="mt-auto">
@@ -169,12 +181,10 @@
         </div>
     </div>
     <!-- End content -->
-    <script src="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/static/js/components/dark.js"></script>
-    <script
-        src="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/extensions/perfect-scrollbar/perfect-scrollbar.min.js">
-    </script>
-
-    <script src="https://cdn.jsdelivr.net/gh/zuramai/mazer@docs/demo/assets/compiled/js/app.js"></script>
+    <script src="/assets/mazer/static/js/components/dark.js"></script>
+    <script src="/assets/mazer/extensions/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="/assets/mazer/compiled/js/app.js"></script>
+    @include('sweetalert::alert')
 </body>
 
 </html>

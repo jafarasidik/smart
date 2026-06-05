@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [PublicController::class, 'index'])->name('index');
+Route::get('/login', [publicController::class, 'login'])->name('login');
 
 Route::prefix('main')->group(function () {
     Route::controller(DashboardController::class)->group(function () {

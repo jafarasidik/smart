@@ -30,7 +30,7 @@
                                 <tr>
                                     <td>{{ $no++ }}</td>
                                     <td>{{ $d->rapat->nama }}</td>
-                                    <td>{{ $d->rapat->tanggal }}</td>
+                                    <td>{{ $d->rapat->tanggal->translatedFormat('j F Y') }}</td>
                                     <td>{{ $d->isi_notulensi }}</td>
                                     <td>
                                         @if($d->file)
