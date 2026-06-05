@@ -8,6 +8,7 @@ use App\Models\Rapat;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -175,5 +176,22 @@ class DashboardController extends Controller
             'categories' => array_column($months, 'label'),
             'series' => array_column($months, 'value')
         ]);
+    }
+    public function logout(Request $request)
+    {
+        // 1. Keluar dari sistem autentikasi Laravel
+        Auth::logout();
+
+        // 2. Hancurkan session user yang sedang aktif agar tidak bisa disalahgunakan
+        $request->session()->invalidate();
+
+        // 3. Regenerasi token CSRF baru untuk keamanan session berikutnya
+        $request->session()->regenerateToken();
+
+        // 4. Tampilkan notifikasi sukses menggunakan RealRashid SweetAlert
+        toast('Anda telah berhasil keluar.', 'success')->position('top-end');
+
+        // 5. Alihkan pengguna kembali ke halaman login atau beranda
+        return redirect()->route('login');
     }
 }
