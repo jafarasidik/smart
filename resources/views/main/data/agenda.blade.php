@@ -2,7 +2,7 @@
 @section("title", "SMART - DATA AGENDA RAPAT")
 @section("page_header", "Data Agenda Rapat")
 @section("konten")
-    <div class="section">
+    <section class="section">
         <div class="card">
             <div class="card-header">
                 <div class="d-grip gap-2 d-md-flex justify-content-md-end">
@@ -62,7 +62,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 @endsection
 @push('script')
     <script>

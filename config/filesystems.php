@@ -63,6 +63,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'public_foto' => [
+            'driver' => 'local',
+            'root' => public_path('foto'), // File akan langsung masuk ke public/file
+            'url' => env('APP_URL').'/foto',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*

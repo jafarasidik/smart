@@ -35,6 +35,10 @@ class PublicController extends Controller
             toast('Silakan login terlebih dahulu untuk mengakses halaman.', 'warning')->position('top-end');
         }
 
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
         return view('login'); // Sesuaikan dengan nama blade login kamu
     }
 

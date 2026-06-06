@@ -59,7 +59,3 @@
         </div>
     </div>
 @endsection
-@push('script')
-    <script src="/assets/mazer/extensions/parsleyjs/parsley.min.js"></script>
-    <script src="/assets/mazer/static/js/pages/parsley.js"></script>
-@endpush

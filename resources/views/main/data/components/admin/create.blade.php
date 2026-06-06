@@ -10,28 +10,29 @@
                     <div class="row">
                         <div class="col-md-6 col-12">
                             <div class="form-group">
-                                <label for="nama">Nama Admin</label>
+                                <label for="nama" class="form-label mandatory">Nama Admin</label>
                                 <input type="text" name="nama" id="nama" class="form-control"
                                     placeholder="Masukkan Nama Admin" value="{{ old('nama') }}" required autofocus>
                             </div>
                         </div>
                         <div class="col-md-6 col-12">
                             <div class="form-group">
-                                <label for="email">Email</label>
+                                <label for="email" class="form-label mandatory">Email</label>
                                 <input type="email" name="email" id="email" class="form-control"
-                                    placeholder="Masukkan Email" value="{{ old('email') }}" required>
+                                    placeholder="Masukkan Email" value="{{ old('email') }}" required
+                                    data-parsley-type="email" data-parsley-type-message="Email tidak valid">
                             </div>
                         </div>
                         <div class="col-md-6 col-12">
                             <div class="form-group">
-                                <label for="password">Password</label>
+                                <label for="password" class="form-label mandatory">Password</label>
                                 <input type="password" name="password" id="password" class="form-control"
-                                    placeholder="********" required data-parsley-minlength="8">
+                                    placeholder="********" required data-parsley-minlength="8" data-parsley-minlength-message="Password minimal 8 karakter">
                             </div>
                         </div>
                         <div class="col-md-6 col-12">
                             <div class="form-group">
-                                <label for="confirm_password">Konfirmasi Password</label>
+                                <label for="confirm_password" class="form-label mandatory">Konfirmasi Password</label>
                                 <input type="password" name="confirm_password" id="confirm_password" class="form-control"
                                     placeholder="********" required data-parsley-equalto="#password"
                                     data-parsley-equalto-message="Password tidak sama.">
@@ -57,7 +58,3 @@
         </div>
     </div>
 @endsection
-@push('script')
-    <script src="/assets/mazer/extensions/parsleyjs/parsley.min.js"></script>
-    <script src="/assets/mazer/static/js/pages/parsley.js"></script>
-@endpush

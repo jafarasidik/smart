@@ -10,6 +10,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends Controller
@@ -193,5 +195,86 @@ class DashboardController extends Controller
 
         // 5. Alihkan pengguna kembali ke halaman login atau beranda
         return redirect()->route('login');
+    }
+
+    public function settings(){
+        $data = auth()->user();
+        return view('main.settings', compact('data'));
+    }
+
+    public function updateProfile(Request $request){
+        $user = User::findOrFail(auth()->user()->id);
+        $request->validate([
+            'nama'             => 'required|string|max:255',
+            // Pastikan email unik, tapi abaikan (ignore) email milik user ini sendiri
+            'email'            => 'required|string|email|max:255|unique:users,email,' . $user->id, 
+            'password'         => 'nullable|string|min:8',
+            // 'required_with:password' memastikan confirm_password wajib diisi JIKA password diisi
+            'confirm_password' => 'nullable|required_with:password|same:password', 
+            'foto_profile'     => 'nullable|mimes:jpg,jpeg,png|max:4096',
+        ], [
+            'nama.required'             => 'Nama admin wajib diisi.',
+            'email.required'            => 'Email wajib diisi.',
+            'email.email'               => 'Format email tidak valid.',
+            'email.unique'              => 'Email ini sudah digunakan oleh akun lain.',
+            'password.min'              => 'Password baru minimal harus 8 karakter.',
+            'confirm_password.required_with' => 'Konfirmasi password wajib diisi jika Anda ingin mengubah password.',
+            'confirm_password.same'     => 'Konfirmasi password tidak cocok dengan password baru.',
+            'foto_profile.mimes'        => 'Format foto harus berupa JPG, JPEG, PNG.',
+            'foto_profile.max'          => 'Ukuran file maksimal 4MB.',
+        ]);
+
+        $filePath = null;
+        $fileLamaYangAkanDihapus = null;
+
+        try {
+            // 2. LOGIKA FILE: Proses upload dipindah ke LUAR transaksi database agar variabel $filePath terbaca di Catch
+            if ($request->hasFile('foto_profile')) {
+                $filePath = $request->file('foto_profile')->store('', 'public_foto'); 
+                if ($user->foto != '7.jpg') {
+                    $fileLamaYangAkanDihapus = $user->foto; 
+                }
+                
+            }
+
+            DB::transaction(function () use ($request, $user, $filePath) {
+                // 3. Siapkan data yang pasti diubah
+                // Perbaikan typo: $request->publsih diubah menjadi $request->publish
+                // Konversi inputan publish menjadi boolean asli (true/false)
+                $dataToUpdate = [
+                    'nama'      => $request->nama, 
+                    'email'     => $request->email,
+                ];
+
+                // Perbaikan: Menggunakan sintaks array [] bukan properti objek ->
+                if ($filePath) {
+                    $dataToUpdate['foto'] = $filePath;
+                }
+
+                if ($request->filled('password')) {
+                    $dataToUpdate['password'] = Hash::make($request->password);
+                }
+
+                // 4. Jalankan perintah update ke database
+                $user->update($dataToUpdate);
+            });
+
+            // 5. JIKA DB SUKSES: Hapus file lama yang digantikan dari storage
+            if ($fileLamaYangAkanDihapus && Storage::disk('public_foto')->exists($fileLamaYangAkanDihapus)) {
+                Storage::disk('public_foto')->delete($fileLamaYangAkanDihapus);
+            }
+
+            toast('Akun berhasil diperbarui.', 'success')->position('top-end');
+            return redirect()->route('pengaturan');
+
+        } catch (\Exception $e) {
+            // 6. JIKA DB ERROR: Hapus file baru yang gagal masuk ke DB agar tidak jadi sampah
+            if ($filePath && Storage::disk('public_foto')->exists($filePath)) {
+                Storage::disk('public_foto')->delete($filePath);
+            }
+
+            alert()->error('Gagal Memperbarui', $e->getMessage());
+            return back()->withInput();
+        }
     }
 }

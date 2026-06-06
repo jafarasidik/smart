@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email_verified_at` timestamp NULL DEFAULT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `foto` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT `7.jpg`,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -93,8 +94,8 @@ CREATE TABLE IF NOT EXISTS `users` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table db_smart.users: ~1 rows (approximately)
-INSERT INTO `users` (`id`, `nama`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`) VALUES
-	(1, 'Jafar', 'jafarasidik@ybth.org', NULL, '$2y$10$.cj9GL4xyvfZI3Dgic6USe5CtWUZWCOWNnjI9EE2xCGofmBZ5d1JG', NULL, '2026-05-05 15:32:55', '2026-05-05 15:32:55');
+INSERT INTO `users` (`id`, `nama`, `email`, `email_verified_at`, `password`, `remember_token`, `foto`, `created_at`, `updated_at`) VALUES
+	(1, 'Jafar', 'jafarasidik@ybth.org', NULL, '$2y$10$.cj9GL4xyvfZI3Dgic6USe5CtWUZWCOWNnjI9EE2xCGofmBZ5d1JG', NULL, '/assets/mazer/compiled/jpg/7.jpg', '2026-05-05 15:32:55', '2026-05-05 15:32:55');
 
 -- Dumping structure for table db_smart.ruangans
 CREATE TABLE IF NOT EXISTS `ruangans` (

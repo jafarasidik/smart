@@ -16,6 +16,9 @@
     <link rel="stylesheet" href="/assets/mazer/extensions/datatables.net-bs5/css/dataTables.bootstrap5.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+    <style>
+        .mandatory::after {content: " *";color: #ff3b30;font-weight: bold;}
+    </style>
 </head>
 <body>
     <script src="/assets/mazer/static/js/initTheme.js"></script>
@@ -124,8 +127,8 @@
 
                         <li class="sidebar-title">Pengaturan</li>
 
-                        <li class="sidebar-item {{ request()->is('main/pengaturan') ? 'active' : '' }} ">
-                            <a href="#" class='sidebar-link'>
+                        <li class="sidebar-item {{ request()->is('main/pengaturan') || request()->is('main/pengaturan/*') ? 'active' : '' }} ">
+                            <a href="{{ route('pengaturan') }}" class='sidebar-link'>
                                 <i class="bi bi-person-fill-gear"></i>
                                 <span>Pengaturan Akun</span>
                             </a>
@@ -171,7 +174,7 @@
                                         </div>
                                         <div class="user-img d-flex align-items-center">
                                             <div class="avatar avatar-md">
-                                                <img src="/assets/mazer/compiled/jpg/7.jpg" alt="Foto Profile">
+                                                <img src="{{ asset('foto/' . auth()->user()->foto) }}" alt="Foto Profile">
                                             </div>
                                         </div>
                                     </div>
@@ -181,7 +184,7 @@
                                     <li>
                                         <h6 class="dropdown-header">Hello, {{ auth()->user()->nama }}</h6>
                                     </li>
-                                    <li><a class="dropdown-item" href="#"><i
+                                    <li><a class="dropdown-item" href="{{ route('pengaturan') }}"><i
                                                 class="icon-mid bi bi-gear me-2"></i>
                                             Pengaturan</a></li>
                                     <hr class="dropdown-divider">
@@ -233,6 +236,8 @@
     <script src="/assets/mazer/static/js/pages/datatables.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="/assets/mazer/extensions/parsleyjs/parsley.min.js"></script>
+    <script src="/assets/mazer/static/js/pages/parsley.js"></script>
     @stack('script')
     @include('sweetalert::alert')
     <script>

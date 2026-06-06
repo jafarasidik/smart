@@ -35,6 +35,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', 'index')->name('dashboard');
             Route::post('/logout', 'logout')->name('logout');
             Route::get('/chart-kehadiran', 'chartKehadiran')->name('dashboard.chart-kehadiran');
+            Route::get('/pengaturan', 'settings')->name('pengaturan');
+            Route::put('/pengaturan/{id}', 'updateProfile')->name('pengaturan.update');
         });
         Route::prefix('data')->group(function () {
             Route::resource('agenda', RapatController::class)->names([
