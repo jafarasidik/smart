@@ -101,6 +101,8 @@ class RapatController extends Controller
     {
         // Ambil data rapat beserta relasi pesertanya
         $data = Rapat::with('peserta')->findOrFail($id);
+        $data->waktu_mulai = Carbon::parse($data->waktu_mulai);
+        $data->waktu_selesai = Carbon::parse($data->waktu_selesai);
         $ruangan = Ruangan::all();
         $peserta = Peserta::orderBy('nama', 'asc')->get();
 

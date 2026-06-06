@@ -34,7 +34,7 @@
                             <div class="form-group">
                                 <label for="email" class="form-label mandatory">Email</label>
                                 <input type="email" name="email" id="email" class="form-control"
-                                    placeholder="Masukkan Email" value="{{ auth()->user()->email }}" required>
+                                    placeholder="Masukkan Email" value="{{ auth()->user()->email }}" required data-parsley-type="email" data-parsley-type-message="Email tidak valid">
                             </div>
                             <div class="form-group">
                                 <label for="password" class="form-label">Password Baru</label>

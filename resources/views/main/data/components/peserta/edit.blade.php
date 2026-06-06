@@ -28,8 +28,8 @@
                         </div>
                         <div class="col-md-6 col-12">
                             <div class="form-group">
-                                <label for="whatsapp">Whatsapp</label>
-                                <input type="number" name="whatsapp" id="whatsapp" class="form-control" placeholder="Masukkan Nomor Whatsapp" value="{{ old('whatsapp', $data->whatsapp) }}" required>
+                                <label for="email">Email</label>
+                                <input type="email" name="email" id="email" class="form-control" placeholder="Masukkan Email" value="{{ old('email', $data->email) }}" required>
                             </div>
                         </div>
                         <div class="col-12 d-flex justify-content-between mt-2">

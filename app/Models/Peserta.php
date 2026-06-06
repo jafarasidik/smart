@@ -13,7 +13,7 @@ class Peserta extends Model
         'nama',
         'jabatan',
         'instansi',
-        'whatsapp',
+        'email',
         'id_jabatan_instansi',
     ];
 

@@ -2,7 +2,7 @@
 @section('title', 'SMART - TAMBAH DATA ADMIN')
 @section('page_header', 'Tambah Data Admin')
 @section('konten')
-    <div class="section">
+    <section class="section">
         <div class="card">
             <div class="card-body">
                 <form action="{{ route('data.admin.store') }}" method="post" class="form" data-parsley-validate>
@@ -56,5 +56,5 @@
                 </form>
             </div>
         </div>
-    </div>
+    </section>
 @endsection

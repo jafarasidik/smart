@@ -11,14 +11,14 @@
             </div>
             <div class="card-body">
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered">
+                    <table id="table1" class="table table-hover table-bordered">
                         <thead>
                             <tr>
                                 <th class="text-center">No</th>
                                 <th class="text-center">Nama Peserta</th>
                                 <th class="text-center">Jabatan</th>
                                 <th class="text-center">Asal Instansi</th>
-                                <th class="text-center">No Whatsapp</th>
+                                <th class="text-center">Email</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -32,7 +32,7 @@
                                     <td>{{ $d->nama }}</td>
                                     <td>{{ $d->jxi->nama_jabatan }}</td>
                                     <td>{{ $d->jxi->nama_instansi }}</td>
-                                    <td>{{ $d->whatsapp }}</td>
+                                    <td>{{ $d->email }}</td>
                                     <td>
                                         <a href="{{ route('data.peserta.edit', $d->id) }}"
                                             class="btn btn-sm btn-success m-1" title="Edit Data"><i

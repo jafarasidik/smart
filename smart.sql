@@ -135,18 +135,19 @@ CREATE TABLE IF NOT EXISTS `personal_access_tokens` (
 CREATE TABLE IF NOT EXISTS `pesertas` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `nama` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `whatsapp` varchar(15) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `id_jabatan_instansi` bigint unsigned DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `pesertas_id_jabatan_instansi_foreign` (`id_jabatan_instansi`),
-  CONSTRAINT `pesertas_id_jabatan_instansi_foreign` FOREIGN KEY (`id_jabatan_instansi`) REFERENCES `instansi_x_jabatans` (`id`) ON DELETE SET NULL
+  CONSTRAINT `pesertas_id_jabatan_instansi_foreign` FOREIGN KEY (`id_jabatan_instansi`) REFERENCES `instansi_x_jabatans` (`id`) ON DELETE SET NULL,
+  UNIQUE KEY `pesertas_email_unique` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Dumping data for table db_smart.pesertas: ~1 rows (approximately)
-INSERT INTO `pesertas` (`id`, `nama`, `whatsapp`, `id_jabatan_instansi`, `created_at`, `updated_at`) VALUES
-	(1, 'ihsan', '081234567890', 1, '2026-05-05 15:33:25', '2026-05-05 15:33:26');
+INSERT INTO `pesertas` (`id`, `nama`, `email`, `id_jabatan_instansi`, `created_at`, `updated_at`) VALUES
+	(1, 'ihsan', 'ihsan123@gmail.com', 1, '2026-05-05 15:33:25', '2026-05-05 15:33:26');
 
 -- Dumping structure for table db_smart.rapats
 CREATE TABLE IF NOT EXISTS `rapats` (

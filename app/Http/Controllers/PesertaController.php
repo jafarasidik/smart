@@ -36,7 +36,7 @@ class PesertaController extends Controller
         $request->validate([
             'nama'              => 'required|string|max:255',
             'jabatanxinstansi'  => 'required|exists:instansi_x_jabatans,id',
-            'whatsapp'          => 'required|numeric',
+            'email'             => 'required|email|max:255|unique:pesertas,email',
         ]);
 
         try {
@@ -47,7 +47,7 @@ class PesertaController extends Controller
                 $rapat = Peserta::create([
                     'nama'                      => $request->nama,
                     'id_jabatan_instansi'       => $request->jabatanxinstansi,
-                    'whatsapp'                  => $request->whatsapp,
+                    'email'                     => $request->email,
                 ]);
             });
             toast('Peserta berhasil ditambahkan.', 'success')->position('top-end');
@@ -86,7 +86,7 @@ class PesertaController extends Controller
         $request->validate([
             'nama'              => 'required|string|max:255',
             'jabatanxinstansi'  => 'required|exists:instansi_x_jabatans,id',
-            'whatsapp'          => 'required|numeric',
+            'email'             => 'required|email|max:255|unique:pesertas,email,' . $id,
         ]);
 
         try {
@@ -97,7 +97,7 @@ class PesertaController extends Controller
                 $peserta->update([
                     'nama'                      => $request->nama,
                     'id_jabatan_instansi'       => $request->jabatanxinstansi,
-                    'whatsapp'                  => $request->whatsapp,
+                    'email'                     => $request->email,
                 ]);
             });
             toast('Peserta berhasil diperbarui.', 'success')->position('top-end');
