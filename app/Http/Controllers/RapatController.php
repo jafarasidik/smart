@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AgendaRapatMail;
 use App\Models\Peserta;
 use App\Models\Rapat;
 use App\Models\Ruangan;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class RapatController extends Controller
 {
@@ -70,7 +73,16 @@ class RapatController extends Controller
 
                 // 4. Simpan ke tabel pivot rapat_pesertas
                 // attach() akan memasukkan array ID peserta ke tabel relasi
-                $rapat->peserta()->attach($request->pesertas);
+                // Buat format array berpasangan untuk menyimpan kolom tambahan (uuid) ke pivot
+                $pivotData = [];
+                foreach ($request->pesertas as $pesertaId) {
+                    $pivotData[$pesertaId] = [
+                        'uuid' => (string) Str::uuid() // UUID unik yang berbeda untuk setiap peserta
+                    ];
+                }
+
+                // attach() menerima array asosiatif: [id_peserta => ['uuid' => '...']]
+                $rapat->peserta()->attach($pivotData);
             });
             toast('Agenda rapat berhasil dibuat.', 'success')->position('top-end');
             return redirect()->route('data.agenda');
@@ -133,7 +145,7 @@ class RapatController extends Controller
         try {
             DB::transaction(function () use ($request, $id) {
                 $rapat = Rapat::findOrFail($id);
-    
+                
                 // 1. Update data utama rapat
                 $rapat->update([
                     'nama'          => $request->nama,
@@ -143,13 +155,31 @@ class RapatController extends Controller
                     'status'        => $request->status,
                     'id_ruangan'    => $request->ruangan,
                 ]);
-    
+
                 // 2. Sinkronisasi tabel pivot rapat_pesertas
-                // sync() akan:
-                // - Menghapus peserta yang tidak ada di form update
-                // - Menambah peserta baru yang baru dicentang
-                // - Membiarkan peserta yang tetap dicentang
-                $rapat->peserta()->sync($request->pesertas);
+                $pivotData = [];
+                
+                // Ambil data peserta yang SUDAH terdaftar sebelumnya beserta UUID lama mereka
+                $currentPeserta = $rapat->peserta()->pluck('uuid', 'id_peserta')->toArray(); 
+                // Catatan: Sesuaikan 'id_peserta' jika nama foreign key di pivot Anda berbeda (misal 'id_peserta')
+
+                foreach ($request->pesertas as $pesertaId) {
+                    if (isset($currentPeserta[$pesertaId])) {
+                        // Jika peserta sudah ada sebelumnya, PERTAHANKAN UUID lamanya agar token email tidak berubah/rusak
+                        $pivotData[$pesertaId] = [
+                            'uuid' => $currentPeserta[$pesertaId]
+                        ];
+                    } else {
+                        // Jika ini peserta baru yang baru ditambahkan, BUATKAN UUID baru
+                        $pivotData[$pesertaId] = [
+                            'uuid' => (string) Str::uuid()
+                        ];
+                    }
+                }
+
+                // GANTI attach() MENJADI sync()
+                // sync() menerima array asosiatif: [id_peserta => ['uuid' => '...']]
+                $rapat->peserta()->sync($pivotData);
             });
             toast('Agenda rapat berhasil diperbarui.', 'success')->position('top-end');
             return redirect()->route('data.agenda');
@@ -211,5 +241,60 @@ class RapatController extends Controller
             alert()->error('Gagal Menghapus Data', $e->getMessage());
             return back();
         }
+    }
+
+    public function getAgendaJson($id)
+    {
+        $agenda = Rapat::with('ruangan')->findOrFail($id);
+        
+        // Ambil peserta langsung dari query builder tabel pivot agar mendapat kolom UUID-nya
+        $peserta = DB::table('rapat_pesertas')
+            ->join('pesertas', 'rapat_pesertas.id_peserta', '=', 'pesertas.id')
+            ->where('rapat_pesertas.id_rapat', $id)
+            ->select('pesertas.id', 'pesertas.nama', 'pesertas.email', 'rapat_pesertas.uuid')
+            ->get();
+
+        return response()->json([
+            'nama'          => $agenda->nama,
+            // Pastikan $agenda->tanggal sudah di-cast sebagai 'date' atau 'datetime' di Model agar bisa pakai translatedFormat
+            'tanggal'       => $agenda->tanggal->translatedFormat('j F Y'),
+            'waktu_mulai'   => $agenda->waktu_mulai,
+            'waktu_selesai' => $agenda->waktu_selesai,
+            'ruangan'       => $agenda->ruangan->nama,
+            'peserta'       => $peserta
+        ]);
+    }
+
+    public function kirimEmailPeserta(Request $request, $id)
+    {
+        // Menerima array berisi UUID peserta yang dicentang oleh user
+        $selectedUuids = $request->input('uuids', []);
+
+        if (empty($selectedUuids)) {
+            return response()->json(['status' => 'error', 'message' => 'Pilih minimal satu peserta.'], 422);
+        }
+
+        $agenda = Rapat::findOrFail($id);
+
+        // Ambil data peserta & uuid dari DB berdasarkan pilihan user saja
+        $penerima = \DB::table('rapat_pesertas')
+            ->join('pesertas', 'rapat_pesertas.id_peserta', '=', 'pesertas.id')
+            ->where('rapat_pesertas.id_rapat', $id)
+            ->whereIn('rapat_pesertas.uuid', $selectedUuids)
+            ->select('pesertas.nama', 'pesertas.email', 'rapat_pesertas.uuid')
+            ->get();
+
+        foreach ($penerima as $p) {
+            // Tautan absensi unik bawa UUID masing-masing untuk cegah kecurangan
+            $linkAbsen = env('APP_URL') . '/absensi/hadir/' . $p->uuid;
+
+            // Kirim email (Disarankan pakai Mail::queue untuk performa)
+            Mail::to($p->email)->send(new AgendaRapatMail($agenda, $p->nama, $linkAbsen));
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => count($penerima) . ' Email undangan dengan token kehadiran unik berhasil dikirim!'
+        ]);
     }
 }

@@ -71,34 +71,53 @@
                         </div>
 
                         @php
-                            // Ambil daftar ID peserta yang sudah terdaftar di rapat ini
-                            $pesertaTerpilih = $data->peserta->pluck('id')->toArray();
                             $no = 1;
                         @endphp
+
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
-                                        <th>No</th>
+                                        <th width="5%">No</th>
                                         <th>Nama</th>
                                         <th>Jabatan</th>
                                         <th>Asal Instansi</th>
-                                        <th>Status</th>
+                                        <th width="15%" class="text-center">Status</th>
+                                        <th>Alasan / Keterangan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($data->peserta as $p)
                                         @php
-                                            $kehadiran = $data->kehadiran
-                                                ->where('id_peserta', $p->id)
-                                                ->first();
+                                            // Ambil data kehadiran berdasarkan id_peserta
+                                            $kehadiran = $data->kehadiran->where('id_peserta', $p->id)->first();
                                         @endphp
                                         <tr>
                                             <td>{{ $no++ }}</td>
-                                            <td>{{ $p->nama }}</td>
+                                            <td class="fw-bold">{{ $p->nama }}</td>
                                             <td>{{ $p->jxi->nama_jabatan }}</td>
                                             <td>{{ $p->jxi->nama_instansi }}</td>
-                                            <td>{{ $kehadiran ? ($kehadiran->status ? 'Hadir' : 'Tidak Hadir') : 'Belum Mengisi' }}</td>
+                                            <td class="text-center">
+                                                @if ($kehadiran)
+                                                    @if ($kehadiran->status === 'Hadir')
+                                                        <span
+                                                            class="badge bg-light-success text-success fw-bold">Hadir</span>
+                                                    @elseif ($kehadiran->status === 'Izin')
+                                                        <span
+                                                            class="badge bg-light-warning text-warning fw-bold">Izin</span>
+                                                    @else
+                                                        <span class="badge bg-light-danger text-danger fw-bold">Tidak
+                                                            Hadir</span>
+                                                    @endif
+                                                @else
+                                                    <span class="badge bg-light-secondary text-secondary">Belum
+                                                        Mengisi</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                {{-- Pengecekan aman: Jika $kehadiran ada dan kolom alasan terisi, tampilkan. Jika tidak, tampilkan '-' --}}
+                                                {{ $kehadiran && $kehadiran->alasan ? $kehadiran->alasan : '-' }}
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

@@ -13,6 +13,7 @@ class Kehadiran extends Model
         'id_rapat',
         'id_peserta',
         'status',
+        'alasan',
         'tandatangan',
     ];
 

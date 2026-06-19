@@ -22,10 +22,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::controller(PublicController::class)->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::get('/login', 'login')->name('login');
+    Route::get('/', 'login')->name('login');
     Route::post('/auth', 'auth')
          ->name('auth');
+    Route::get('/absensi/hadir/{uuid}', 'prosesAbsensiHadir')->name('agenda.absensi.hadir');
+    Route::post('/absensi/simpan/{uuid}', 'prosesAbsensiSimpan')->name('agenda.absensi.simpan');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -48,6 +49,8 @@ Route::middleware(['auth'])->group(function () {
                 'update'    => 'data.agenda.update',
                 'destroy'   => 'data.agenda.delete',
             ]);
+            Route::get('/agenda/{id}/json', [RapatController::class, 'getAgendaJson'])->name('data.agenda.json');
+            Route::post('/agenda/{id}/kirim-email', [RapatController::class, 'kirimEmailPeserta'])->name('data.agenda.kirim-email');
             Route::resource('peserta', PesertaController::class)->names([
                 'index'     => 'data.peserta',
                 'create'    => 'data.peserta.create',

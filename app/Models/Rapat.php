@@ -28,7 +28,10 @@ class Rapat extends Model
 
     public function peserta()
     {
-        return $this->belongsToMany(Peserta::class, 'rapat_pesertas', 'id_rapat', 'id_peserta');
+        // Parameter: ModelTujuan, NamaTabelPivot, FK_ModelIni, FK_ModelTujuan
+        return $this->belongsToMany(Peserta::class, 'rapat_pesertas', 'id_rapat', 'id_peserta')
+                    ->withPivot('uuid') // Kunci agar kolom 'uuid' di pivot bisa diakses
+                    ->withTimestamps(); // Tambahkan ini jika tabel pivot Anda punya created_at & updated_at
     }
     public function user()
     {

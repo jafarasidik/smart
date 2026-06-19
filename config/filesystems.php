@@ -70,6 +70,13 @@ return [
             'visibility' => 'public',
         ],
 
+        'public_ttd' => [
+            'driver' => 'local',
+            'root' => public_path('ttd'), // File akan langsung masuk ke public/file
+            'url' => env('APP_URL').'/ttd',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*
