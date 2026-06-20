@@ -19,7 +19,6 @@
                                 <th class="text-center">Tanggal Rapat</th>
                                 <th class="text-center">Isi Notulensi</th>
                                 <th class="text-center">Dokumen</th>
-                                <th class="text-center">Aktif Sampai</th>
                                 <th class="text-center">Aksi</th>
                             </tr>
                         </thead>
@@ -34,25 +33,23 @@
                                     <td>{{ $d->rapat->tanggal->translatedFormat('j F Y') }}</td>
                                     <td>{{ $d->isi_notulensi }}</td>
                                     <td>
-                                        @if($d->file)
+                                        @if ($d->file)
                                             <a href="{{ asset('file/' . $d->file) }}" target="_blank">Lihat Dokumen</a>
                                         @else
                                             <span class="text-muted">Tidak ada file</span>
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($d->sampai)
-                                            {{ $d->sampai->translatedFormat('j F Y') }}
-                                        @else
-                                            Tidak di publish
-                                        @endif
-                                    </td>
-                                    <td>
                                         <a href="{{ route('data.notulensi.edit', $d->id) }}"
                                             class="btn btn-sm btn-success m-1" title="Edit Data"><i
                                                 class="bi bi-pencil-square"></i></a>
+                                        <button type="button" class="btn btn-light btn-sm m-1 btn-share"
+                                            data-id="{{ $d->id }}" data-nama="{{ $d->rapat->nama }}" title="Bagikan Notulensi">
+                                            <i class="bi bi-share-fill"></i>
+                                        </button>
                                         <form action="{{ route('data.notulensi.delete', $d->id) }}" method="POST"
-                                            class="form-delete" data-nama="{{ $d->rapat->nama }} - {{ $d->rapat->tanggal->translatedFormat('j F Y') }}">
+                                            class="form-delete"
+                                            data-nama="{{ $d->rapat->nama }} - {{ $d->rapat->tanggal->translatedFormat('j F Y') }}">
                                             @method('DELETE')
                                             @csrf
 
@@ -102,6 +99,50 @@
 
             });
 
+        });
+
+        $(document).on('click', '.btn-share', function(e) {
+            e.preventDefault();
+            const namaRapat = $(this).data('nama');
+            let id = $(this).data('id');
+
+            Swal.fire({
+                title: `Bagikan Notulensi ${namaRapat}?`,
+                text: "Isi notulensi dan dokumen rapat akan dikirimkan ke email seluruh peserta yang terdaftar.",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Kirim Email!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Mohon Tunggu',
+                        text: 'Sedang memproses pengiriman email...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    });
+
+                    // Kirim request ke Controller
+                    $.ajax({
+                        url: "/main/data/notulensi/share/" + id,
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function(response) {
+                            Swal.fire('Berhasil!', response.message, 'success');
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Gagal!', xhr.responseJSON?.message ||
+                                'Terjadi kesalahan sistem.', 'error');
+                        }
+                    });
+                }
+            });
         });
     </script>
 @endpush

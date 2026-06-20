@@ -13,13 +13,7 @@ class Notulensi extends Model
         'id_rapat',
         'isi_notulensi',
         'file',
-        'publish',
-        'sampai',
-    ];
-
-    protected $casts = [
-        'sampai' => 'date',
-    ];
+    ];  
 
     protected $table = 'notulensis';
 

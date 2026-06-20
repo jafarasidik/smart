@@ -84,6 +84,7 @@ Route::middleware(['auth'])->group(function () {
                 'update'    => 'data.notulensi.update',
                 'destroy'   => 'data.notulensi.delete',
             ]);
+            Route::post('/notulensi/share/{id}', [NotulensiController::class, 'shareNotulensi'])->name('data.notulensi.share');
             Route::resource('admin', AdminController::class)->names([
                 'index'     => 'data.admin',
                 'create'    => 'data.admin.create',

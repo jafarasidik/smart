@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\KirimNotulensiMail;
 use App\Models\Notulensi;
 use App\Models\Rapat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -43,8 +45,6 @@ class NotulensiController extends Controller
             'rapat'         => 'required|exists:rapats,id',
             'isi'           => 'required',
             'file_dokumen'  => 'nullable|mimes:pdf,docx|max:4096',
-            'publish'       => 'required',
-            'aktif_sampai'  => 'nullable|date'
         ], [
             'rapat.exists'         => 'Agenda tidak terdaftar',
             'file_dokumen.mimes'    => 'File yang diupload hanya PDF dan DOC',
@@ -67,8 +67,6 @@ class NotulensiController extends Controller
                     'id_rapat'      => $request->rapat,
                     'isi_notulensi' => $request->isi,
                     'file'          => $filePath,
-                    'publish'       => $request->publish,
-                    'sampai'        => $request->aktif_sampai
                 ]);
             });
             toast('Notulensi berhasil ditambahkan.', 'success')->position('top-end');
@@ -112,14 +110,10 @@ class NotulensiController extends Controller
             'rapat'         => 'required|exists:rapats,id',
             'isi'           => 'required',
             'file_dokumen'  => 'nullable|mimes:pdf,docx|max:4096',
-            'publish'       => 'required',
-            // PERBAIKAN LOGIKA: Wajib diisi jika nilai 'publish' adalah string 'true' atau bolean true
-            'aktif_sampai'  => 'required_if:publish,true|nullable|date'
         ], [
             'rapat.exists'          => 'Agenda tidak terdaftar',
             'file_dokumen.mimes'    => 'File yang diupload hanya PDF dan DOC',
             'file_dokumen.max'      => 'File yang diupload max 4MB',
-            'aktif_sampai.required_if' => 'Tanggal aktif sampai wajib diisi jika notulensi dipublikasikan.',
         ]);
 
         $notulensi = Notulensi::findOrFail($id);
@@ -139,20 +133,15 @@ class NotulensiController extends Controller
                 // 3. Siapkan data yang pasti diubah
                 // Perbaikan typo: $request->publsih diubah menjadi $request->publish
                 // Konversi inputan publish menjadi boolean asli (true/false)
-                $isPublished = filter_var($request->publish, FILTER_VALIDATE_BOOLEAN);
                 $dataToUpdate = [
                     'id_rapat' => $request->rapat, 
                     'isi'      => $request->isi,
-                    'publish'  => $isPublished,
                 ];
 
                 // Perbaikan: Menggunakan sintaks array [] bukan properti objek ->
                 if ($filePath) {
                     $dataToUpdate['file'] = $filePath;
                 }
-
-                // Atur nilai 'sampai' (jika publish false, set null agar bersih di database)
-                $dataToUpdate['sampai'] = $isPublished ? $request->aktif_sampai : null;
 
                 // 4. Jalankan perintah update ke database
                 $notulensi->update($dataToUpdate);
@@ -202,6 +191,39 @@ class NotulensiController extends Controller
             alert()->error('Gagal Menghapus', 'Gagal menghapus notulensi: ' . $e->getMessage());
             
             return back();
+        }
+    }
+
+    public function shareNotulensi($id)
+    {
+        try {
+            // Ambil data notulensi beserta relasi rapat dan pesertanya
+            $notulensi = Notulensi::with(['rapat.peserta'])->findOrFail($id);
+            
+            $pesertas = $notulensi->rapat->peserta;
+
+            if ($pesertas->isEmpty()) {
+                return response()->json(['message' => 'Gagal mengirim, tidak ada peserta yang terdaftar pada rapat ini.'], 422);
+            }
+
+            // Kumpulkan semua email peserta rapat
+            $emailPesertas = $pesertas->pluck('email')->filter()->toArray(); // Pastikan kolom 'email' ada di tabel peserta
+
+            if (empty($emailPesertas)) {
+                return response()->json(['message' => 'Peserta terdaftar tidak memiliki alamat email yang valid.'], 422);
+            }
+
+            // Kirim email massal (Gunakan queue jika data email sangat banyak agar tidak lemot)
+            Mail::to($emailPesertas)->send(new KirimNotulensiMail($notulensi));
+
+            return response()->json([
+                'message' => 'Notulensi berhasil dibagikan ke ' . count($emailPesertas) . ' email peserta.'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
