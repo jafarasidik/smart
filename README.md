@@ -85,4 +85,5 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 - cp .env.example .env
 - edit .env
 - load database di HeidiSQL dengan nama file smart.sql
+- agar sistem bisa kirim email, ketik di cmd php artisan queue:work
 - sistem bisa digunakan
