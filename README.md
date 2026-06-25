@@ -73,3 +73,16 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 - composer config audit.block-insecure false
 - composer dump-automake --ignore-platform-reqs
 - composer install --ignore-platform-reqs
+
+## Cara Install
+- Buka cmd
+- Ketik cd Downloads
+- ketik git clone https://github.com/jafarasidik/smart
+- composer config audit.block-insecure false
+- composer update -W
+- config audit.block-insecure false
+- composer dump-automake --ignore-platform-reqs
+- cp .env.example .env
+- edit .env
+- load database di HeidiSQL dengan nama file smart.sql
+- sistem bisa digunakan
