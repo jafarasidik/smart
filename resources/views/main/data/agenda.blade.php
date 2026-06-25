@@ -33,7 +33,7 @@
                                     <td>{{ $d->waktu_mulai }}</td>
                                     <td>{{ $d->waktu_selesai }}</td>
                                     <td>{{ $d->ruangan->nama }} - {{ $d->ruangan->lokasi }}</td>
-                                    <td>{{ $d->status ? 'Aktif' : 'Tidak Aktif' }}</td>
+                                    <td>{{ $d->status }}</td>
                                     <td>
                                         <a href="{{ route('data.agenda.show', $d->id) }}" class="btn btn-sm btn-info m-1"
                                             title="Detail Data"><i class="bi bi-eye"></i></a>

@@ -64,3 +64,12 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Solusi Error Security Advisor
+- composer config audit.block-insecure false
+- composer install / composer update -W
+
+## Solusi Error Platform PHP Composer
+- composer config audit.block-insecure false
+- composer dump-automake --ignore-platform-reqs
+- composer install --ignore-platform-reqs

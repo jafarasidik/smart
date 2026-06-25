@@ -118,8 +118,8 @@
                         <li class="sidebar-title">Laporan</li>
 
                         <li
-                            class="sidebar-item {{ request()->is('main/laporan/registrasi') || request()->is('main/laporan/modifikasi') ? 'active' : '' }}">
-                            <a href="#" class='sidebar-link'>
+                            class="sidebar-item {{ request()->is('main/laporan') || request()->is('main/laporan/*') ? 'active' : '' }}">
+                            <a href="{{ route('laporan') }}" class='sidebar-link'>
                                 <i class="bi bi-book-fill"></i>
                                 <span>Laporan Agenda Rapat</span>
                             </a>

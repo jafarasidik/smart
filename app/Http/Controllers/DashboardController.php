@@ -94,7 +94,6 @@ class DashboardController extends Controller
         ]);
         
         $validator->after(function ($validator) use ($request) {
-        
             if (
                 $request->tanggal_awal &&
                 $request->tanggal_akhir &&
@@ -119,15 +118,19 @@ class DashboardController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
+
         $tanggalAwal = Carbon::parse($request->tanggal_awal)->startOfDay();
         $tanggalAkhir = Carbon::parse($request->tanggal_akhir)->endOfDay();
 
+        // PERBAIKAN QUERY: Menghitung masing-masing status berdasarkan string (Hadir, Tidak Hadir, Izin)
         $data = Kehadiran::join('rapats', 'kehadirans.id_rapat', '=', 'rapats.id')
             ->selectRaw("
                 YEAR(rapats.tanggal) as tahun,
                 MONTH(rapats.tanggal) as bulan,
                 COUNT(*) as total,
-                SUM(CASE WHEN kehadirans.status = 1 THEN 1 ELSE 0 END) as hadir
+                SUM(CASE WHEN kehadirans.status = 'Hadir' THEN 1 ELSE 0 END) as hadir,
+                SUM(CASE WHEN kehadirans.status = 'Tidak Hadir' THEN 1 ELSE 0 END) as tidak_hadir,
+                SUM(CASE WHEN kehadirans.status = 'Izin' THEN 1 ELSE 0 END) as izin
             ")
             ->whereBetween('rapats.tanggal', [
                 $tanggalAwal,
@@ -142,41 +145,56 @@ class DashboardController extends Controller
             ->get();
 
         $months = [];
-
         $current = $tanggalAwal->copy()->startOfMonth();
 
+        // Inisialisasi susunan bulan kosong
         while ($current <= $tanggalAkhir) {
-
             $key = $current->format('Y-m');
 
             $months[$key] = [
-                'label' => $current->translatedFormat('M Y'),
-                'value' => 0
+                'label'       => $current->translatedFormat('M Y'),
+                'hadir'       => 0,
+                'tidak_hadir' => 0,
+                'izin'        => 0
             ];
 
             $current->addMonth();
         }
 
+        // Mengisi data persentase ke dalam masing-masing bulan
         foreach ($data as $item) {
+            $key = sprintf('%04d-%02d', $item->tahun, $item->bulan);
 
-            $key = sprintf(
-                '%04d-%02d',
-                $item->tahun,
-                $item->bulan
-            );
-    
             if (isset($months[$key])) {
-    
-                $months[$key]['value'] =
-                    $item->total > 0
-                    ? round(($item->hadir / $item->total) * 100, 2)
-                    : 0;
+                $total = $item->total > 0 ? $item->total : 1; // Cegah error pembagian dengan angka 0
+                
+                // Hitung persentase (%) untuk masing-masing kategori
+                $months[$key]['hadir']       = round(($item->hadir / $total) * 100, 2);
+                $months[$key]['tidak_hadir'] = round(($item->tidak_hadir / $total) * 100, 2);
+                $months[$key]['izin']        = round(($item->izin / $total) * 100, 2);
             }
         }
-    
+
+        // FORMAT BARU: Mengembalikan struktur multi-series lengkap dengan hex-color
         return response()->json([
             'categories' => array_column($months, 'label'),
-            'series' => array_column($months, 'value')
+            'series' => [
+                [
+                    'name'  => 'Hadir',
+                    'data'  => array_column($months, 'hadir'),
+                    'color' => '#3B82F6' // Biru (Kekinian ala Tailwind)
+                ],
+                [
+                    'name'  => 'Tidak Hadir',
+                    'data'  => array_column($months, 'tidak_hadir'),
+                    'color' => '#EF4444' // Merah
+                ],
+                [
+                    'name'  => 'Izin',
+                    'data'  => array_column($months, 'izin'),
+                    'color' => '#FBBF24' // Kuning
+                ]
+            ]
         ]);
     }
     public function logout(Request $request)

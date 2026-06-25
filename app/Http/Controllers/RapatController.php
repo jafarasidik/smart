@@ -45,7 +45,7 @@ class RapatController extends Controller
             'tanggal' => 'required|date',
             'waktu_mulai' => 'required',
             'waktu_selesai' => 'required',
-            'status' => 'required|in:0,1',
+            'status' => 'required|in:Aktif,Tidak Aktif,Selesai',
             'ruangan' => 'required|exists:ruangans,id',
             'pesertas' => 'required|array|min:1', // Harus pilih minimal 1 peserta
         ], [
@@ -131,7 +131,7 @@ class RapatController extends Controller
             'tanggal' => 'required|date',
             'waktu_mulai' => 'required',
             'waktu_selesai' => 'required',
-            'status' => 'required|in:0,1',
+            'status' => 'required|in:Aktif,Tidak Aktif,Selesai',
             'ruangan' => 'required|exists:ruangans,id',
             'pesertas' => 'required|array|min:1',
         ],[
@@ -198,26 +198,26 @@ class RapatController extends Controller
         $rapat = Rapat::findOrFail($id);
 
         $sekarang = Carbon::now();
-        $tanggal = Carbon::parse($rapat->tanggal)->toDateString();
+        $tanggalStr = $rapat->tanggal->format('Y-m-d');
 
-        $mulai = Carbon::parse($tanggal . ' ' . $rapat->waktu_mulai);
-        $selesai = Carbon::parse($tanggal . ' ' . $rapat->waktu_selesai);
+        // Gabungkan tanggal rapat dengan jam selesai rapat
+        $waktuSelesaiRapat = Carbon::parse($tanggalStr . ' ' . $rapat->waktu_selesai);
 
-        // Cek apakah sekarang berada di antara mulai dan selesai
-        if ($rapat->status && $sekarang->between($mulai, $selesai)) {
-            toast('Rapat sedang berlangsung dan tidak dapat dihapus!', 'error')->position('top-end');
+        // JIKA waktu sekarang BELUM MELEBIHI waktu selesai agenda, maka TIDAK BISA dihapus
+        if ($sekarang->lessThanOrEqualTo($waktuSelesaiRapat) && $rapat->status == "Aktif") {
+            toast('Agenda rapat belum selesai atau sedang berjalan, tidak dapat dihapus!', 'error')->position('top-end');
             return back();
         }
 
+        // JIKA lolos pengecekan di atas (artinya sudah lewat), jalankan proses hapus
         try {
             DB::transaction(function () use ($rapat) {
                 
                 // 1. Hapus relasi Many-to-Many ke peserta
                 $rapat->peserta()->detach();
 
-                // 2. PERBAIKAN: Karena 'kehadiran' adalah banyak data (Collection), kita harus looping
+                // 2. Hapus file tanda tangan jika ada
                 foreach ($rapat->kehadiran as $hadir) {
-                    // Cek apakah ada file tanda tangan di setiap baris kehadiran
                     if ($hadir->tandatangan) {
                         if (Storage::disk('public_direct')->exists($hadir->tandatangan)) {
                             Storage::disk('public_direct')->delete($hadir->tandatangan);
@@ -225,9 +225,8 @@ class RapatController extends Controller
                     }
                 }
 
-                // 3. Hapus semua data kehadiran yang terikat dengan rapat ini sekaligus
+                // 3. Hapus data absensi dan notulensi
                 $rapat->kehadiran()->delete();
-
                 $rapat->notulensi()->delete();
 
                 // 4. Hapus data utama Rapat

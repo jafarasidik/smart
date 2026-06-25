@@ -111,7 +111,7 @@ class PublicController extends Controller
         // 2. Ambil data Rapat untuk memastikan status rapat masih aktif
         $rapat = Rapat::where('id', $pivotData->id_rapat)->first();
         
-        if ($rapat->status == 0) {
+        if ($rapat->status == "Selesai" || $rapat->status == "Tidak Aktif") {
             return view('gagal', ['message' => 'Maaf, absensi gagal karena agenda rapat ini sudah tidak aktif / ditutup.']);
         }
 
@@ -176,10 +176,11 @@ class PublicController extends Controller
 
         // 2. Cek apakah rapat masih aktif
         $rapat = DB::table('rapats')->where('id', $pivotData->id_rapat)->first();
-        if ($rapat->status == 0) {
+        if ($rapat->status == "Selesai" || $rapat->status == "Tidak Aktif") {
             toast('Absensi gagal karena agenda rapat ini sudah ditutup!', 'error')->position('top-end');
             return redirect()->back();
         }
+
 
         // 3. Cek apakah peserta ini sudah melakukan absen sebelumnya (mencegah double submit)
         $sudahAbsen = DB::table('kehadirans')

@@ -46,10 +46,11 @@
                                 <label for="status" class="form-label mandatory">Status Rapat</label>
                                 <select name="status" id="status" class="form-select" required>
                                     <option value="">-- Pilih Status --</option>
-                                    <option value="1" {{ old('status', $data->status) == '1' ? 'selected' : '' }}>Aktif
+                                    <option value="Aktif" {{ old('status', $data->status) == 'Aktif' ? 'selected' : '' }}>Aktif
                                     </option>
-                                    <option value="0" {{ old('status', $data->status) == '0' ? 'selected' : '' }}>Tidak
+                                    <option value="Tidak Aktif" {{ old('status', $data->status) == 'Tidak Aktif' ? 'selected' : '' }}>Tidak
                                         Aktif</option>
+                                    <option value="Selesai" {{ old('status', $data->status) == 'Selesai' ? 'selected' : '' }}>Selesai</option>
                                 </select>
                             </div>
                         </div>

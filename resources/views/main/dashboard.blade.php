@@ -156,7 +156,6 @@
         let chart;
 
         function loadChart() {
-
             $.ajax({
                 url: "{{ route('dashboard.chart-kehadiran') }}",
                 type: "GET",
@@ -165,25 +164,37 @@
                     tanggal_akhir: $('#tanggal_akhir').val()
                 },
                 success: function(result) {
-
                     if (!chart) {
-
                         chart = new ApexCharts(
                             document.querySelector("#chart-profile-visit"), {
                                 chart: {
                                     type: 'bar',
-                                    height: 300
+                                    height: 350, // Sedikit ditinggikan agar legend di bawahnya muat rapi
+                                    stacked: false // Set true jika ingin batang menumpuk ke atas
                                 },
-                                series: [{
-                                    name: 'Kehadiran (%)',
-                                    data: result.series
-                                }],
+                                // PERBAIKAN: Langsung masukkan object multi-series dari backend
+                                series: result.series, 
+                                // PERBAIKAN: Ambil array warna dari data series backend
+                                colors: result.series.map(item => item.color),
                                 xaxis: {
                                     categories: result.categories
                                 },
                                 yaxis: {
                                     min: 0,
-                                    max: 100
+                                    max: 100,
+                                    title: {
+                                        text: 'Persentase (%)'
+                                    }
+                                },
+                                dataLabels: {
+                                    enabled: false // Matikan angka di dalam batang agar tidak tumpang tindih
+                                },
+                                tooltip: {
+                                    y: {
+                                        formatter: function (val) {
+                                            return val + " %"
+                                        }
+                                    }
                                 }
                             }
                         );
@@ -191,31 +202,30 @@
                         chart.render();
 
                     } else {
-
+                        // PERBAIKAN: Update opsi sumbu X dan warna baru jika ada perubahan
                         chart.updateOptions({
                             xaxis: {
                                 categories: result.categories
-                            }
+                            },
+                            colors: result.series.map(item => item.color)
                         });
 
-                        chart.updateSeries([{
-                            name: 'Kehadiran (%)',
-                            data: result.series
-                        }]);
+                        // PERBAIKAN: Gunakan seluruh array multi-series yang baru untuk update grafik
+                        chart.updateSeries(result.series);
                     }
                 },
                 error: function(xhr) {
-
                     let res = xhr.responseJSON;
-
                     let msg = '';
 
-                    if (res.errors) {
+                    if (res && res.errors) {
                         msg = Object.values(res.errors)
                             .flat()
                             .join('\n');
-                    } else {
+                    } else if (res && res.message) {
                         msg = res.message;
+                    } else {
+                        msg = 'Terjadi kesalahan sistem.';
                     }
 
                     Swal.fire({
@@ -234,7 +244,6 @@
         });
 
         function resetFilter() {
-
             let today = new Date();
             let sixMonthsAgo = new Date();
             sixMonthsAgo.setMonth(today.getMonth() - 5);
@@ -244,6 +253,7 @@
 
             loadChart();
         }
+        
         $('#btnReset').on('click', function() {
             resetFilter();
         });

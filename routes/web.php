@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InstansiXJabatanController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\NotulensiController;
 use App\Http\Controllers\PesertaController;
 use App\Http\Controllers\PublicController;
@@ -38,6 +39,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/chart-kehadiran', 'chartKehadiran')->name('dashboard.chart-kehadiran');
             Route::get('/pengaturan', 'settings')->name('pengaturan');
             Route::put('/pengaturan/{id}', 'updateProfile')->name('pengaturan.update');
+        });
+        Route::prefix('laporan')->group(function () {
+            Route::controller(LaporanController::class)->group(function () {
+                Route::get('/', 'index')->name('laporan');
+                Route::get('/export/pdf', 'exportPdf')->name('laporan.pdf');
+            });
         });
         Route::prefix('data')->group(function () {
             Route::resource('agenda', RapatController::class)->names([
